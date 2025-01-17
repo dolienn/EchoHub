@@ -7,8 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import pl.dolien.echohub.common.BaseAuditingEntity;
 import pl.dolien.echohub.message.Message;
-import pl.dolien.echohub.message.MessageState;
-import pl.dolien.echohub.message.MessageType;
 import pl.dolien.echohub.user.User;
 
 import java.time.LocalDateTime;
@@ -25,6 +23,10 @@ import static pl.dolien.echohub.message.MessageType.TEXT;
 @NoArgsConstructor
 @Entity
 @Table(name = "chat")
+@NamedQuery(name = ChatConstants.FIND_CHAT_BY_SENDER_ID,
+            query = "SELECT DISTINCT c FROM Chat c WHERE c.sender.id = :senderId OR c.recipient.id = :senderId ORDER BY createdDate DESC")
+@NamedQuery(name = ChatConstants.FIND_CHAT_BY_SENDER_ID_AND_RECEIVER,
+            query = "SELECT DISTINCT c from Chat c WHERE  (c.sender.id = :senderId AND c.recipient.id = :recipientId) OR (c.sender.id = :recipientId AND c.recipient.id = :senderId)")
 public class Chat extends BaseAuditingEntity {
 
     @Id
