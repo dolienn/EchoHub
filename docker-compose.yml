@@ -1,0 +1,36 @@
+services:
+  postgres:
+    container_name: postgres-sql-eh
+    image: postgres
+    environment:
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_DB: echohub
+    volumes:
+      - postgres:/data/postgres
+    ports:
+      - ${DB_PORT}:${DB_PORT}
+    networks:
+      - echohub
+    restart: unless-stopped
+
+  keycloak:
+    container_name: keycloak-eh
+    image: quay.io/keycloak/keycloak:26.1.0
+    ports:
+      - ${KEYCLOAK_PORT}:${KEYCLOAK_PORT}
+    environment:
+      KEYCLOAK_ADMIN: ${KEYCLOAK_ADMIN}
+      KEYCLOAK_ADMIN_PASSWORD: ${KEYCLOAK_ADMIN_PASSWORD}
+    networks:
+      - echohub
+    command: "start-dev"
+
+networks:
+  echohub:
+    driver: bridge
+
+volumes:
+  postgres:
+    driver: local

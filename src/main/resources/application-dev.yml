@@ -1,0 +1,32 @@
+spring:
+  datasource:
+    urL: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+    database: postgresql
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+  flyway:
+    enabled: false
+  security:
+    oauth2:
+      resourceserver:
+        jwt:
+          issuer-uri: ${ISSUER_URI}
+  servlet:
+    multipart:
+      max-file-size: 50MB
+
+application:
+  file:
+    uploads:
+      media-output.path: ${MEDIA_OUTPUT_PATH}
+
+angular:
+  url: ${ANGULAR_URL}
