@@ -14,6 +14,8 @@ import java.util.List;
 
 import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.GenerationType.UUID;
+import static pl.dolien.echohub.chat.ChatConstants.FIND_CHAT_BY_SENDER_ID;
+import static pl.dolien.echohub.chat.ChatConstants.FIND_CHAT_BY_SENDER_ID_AND_RECEIVER;
 import static pl.dolien.echohub.message.MessageState.SENT;
 import static pl.dolien.echohub.message.MessageType.TEXT;
 
@@ -23,9 +25,9 @@ import static pl.dolien.echohub.message.MessageType.TEXT;
 @NoArgsConstructor
 @Entity
 @Table(name = "chat")
-@NamedQuery(name = ChatConstants.FIND_CHAT_BY_SENDER_ID,
+@NamedQuery(name = FIND_CHAT_BY_SENDER_ID,
             query = "SELECT DISTINCT c FROM Chat c WHERE c.sender.id = :senderId OR c.recipient.id = :senderId ORDER BY createdDate DESC")
-@NamedQuery(name = ChatConstants.FIND_CHAT_BY_SENDER_ID_AND_RECEIVER,
+@NamedQuery(name = FIND_CHAT_BY_SENDER_ID_AND_RECEIVER,
             query = "SELECT DISTINCT c from Chat c WHERE  (c.sender.id = :senderId AND c.recipient.id = :recipientId) OR (c.sender.id = :recipientId AND c.recipient.id = :senderId)")
 public class Chat extends BaseAuditingEntity {
 
@@ -36,19 +38,20 @@ public class Chat extends BaseAuditingEntity {
     @ManyToOne
     @JoinColumn(name = "sender_id")
     private User sender;
+
     @ManyToOne
     @JoinColumn(name = "recipient_id")
     private User recipient;
+
     @OneToMany(mappedBy = "chat", fetch = EAGER)
     @OrderBy("createdDate DESC")
     private List<Message> messages;
 
     @Transient
     public String getChatName(final String senderId) {
-        if(recipient.getId().equals(senderId)) {
-            return sender.getFirstName() + " " + sender.getLastName();
-        }
-        return recipient.getFirstName() + " " + recipient.getLastName();
+        return recipient.getId().equals(senderId)
+                ? sender.getFirstName() + " " + sender.getLastName()
+                : recipient.getFirstName() + " " + recipient.getLastName();
     }
 
     @Transient
@@ -63,10 +66,10 @@ public class Chat extends BaseAuditingEntity {
     @Transient
     public String getLastMessage() {
         if(messages != null && !messages.isEmpty()) {
-            if(messages.get(0).getType() != TEXT) {
-                return "Attachment";
-            }
-            return messages.get(0).getContent();
+            Message lastMessage = messages.get(0);
+            return lastMessage.getType() != TEXT
+                    ? "Attachment"
+                    : lastMessage.getContent();
         }
         return null;
     }

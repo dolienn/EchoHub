@@ -17,14 +17,18 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public class KeycloakJwtAuthenticationConverter implements Converter<Jwt, AbstractAuthenticationToken> {
+
     @Override
-    public AbstractAuthenticationToken convert(@NonNull Jwt source) {
-        return new JwtAuthenticationToken(source,
-                Stream.concat(new JwtGrantedAuthoritiesConverter().convert(source).stream(),
-                        extractResourceRoles(source)
-                                .stream()
-                ).collect(Collectors.toSet())
-        );
+    public AbstractAuthenticationToken convert(@NonNull Jwt jwt) {
+        var grantedAuthorities = Stream.concat(
+                new JwtGrantedAuthoritiesConverter()
+                        .convert(jwt)
+                        .stream(),
+                extractResourceRoles(jwt)
+                        .stream()
+        ).collect(Collectors.toSet());
+
+        return new JwtAuthenticationToken(jwt, grantedAuthorities);
     }
 
     private Collection<? extends GrantedAuthority> extractResourceRoles(Jwt jwt) {
