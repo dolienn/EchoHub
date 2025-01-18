@@ -23,7 +23,7 @@ import static org.springframework.test.util.ReflectionTestUtils.setField;
 class FileServiceTest {
 
     private static final String USER_ID = "testUserId";
-    private static final String FILE_NAME = "testfile.txt";
+    private static final String FILE_NAME = "testing.txt";
     private static final String FILE_CONTENT = "Test content";
     private static final String USER_FOLDER_PREFIX = "users";
     private static final String FILE_SEPARATOR = separator;
