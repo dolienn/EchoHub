@@ -4,7 +4,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.io.TempDir;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.springframework.web.multipart.MultipartFile;
 import pl.dolien.echohub.exception.DirectoryCreationException;
 import pl.dolien.echohub.exception.FileSaveException;
