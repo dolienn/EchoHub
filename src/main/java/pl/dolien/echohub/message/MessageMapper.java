@@ -2,6 +2,8 @@ package pl.dolien.echohub.message;
 
 import pl.dolien.echohub.message.dto.MessageResponse;
 
+import static pl.dolien.echohub.file.FileUtils.readFileFromLocation;
+
 public class MessageMapper {
 
     private MessageMapper() {}
@@ -15,7 +17,7 @@ public class MessageMapper {
                 .type(message.getType())
                 .state(message.getState())
                 .createdAt(message.getCreatedDate())
-                //todo read the media file
+                .media(readFileFromLocation(message.getMediaFilePath()))
                 .build();
     }
 }

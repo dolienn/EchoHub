@@ -15,6 +15,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ChatService {
 
+    private static final String CHAT_NOT_FOUND_MSG = "Chat not found.";
     private final ChatRepository repository;
     private final UserService userService;
     private final ChatMapper mapper;
@@ -37,7 +38,7 @@ public class ChatService {
     }
 
     public Chat getChatById(String chatId) {
-        return repository.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat not found."));
+        return repository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT_NOT_FOUND_MSG));
     }
 
     private String createAndSaveChat(String senderId, String receiverId) {
