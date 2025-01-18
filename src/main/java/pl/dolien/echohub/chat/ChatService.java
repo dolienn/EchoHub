@@ -1,5 +1,6 @@
 package pl.dolien.echohub.chat;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -33,6 +34,10 @@ public class ChatService {
         return repository.findChatByReceiverAndSender(senderId, receiverId)
                 .map(Chat::getId)
                 .orElseGet(() -> createAndSaveChat(senderId, receiverId));
+    }
+
+    public Chat getChatById(String chatId) {
+        return repository.findById(chatId).orElseThrow(() -> new EntityNotFoundException("Chat not found."));
     }
 
     private String createAndSaveChat(String senderId, String receiverId) {
