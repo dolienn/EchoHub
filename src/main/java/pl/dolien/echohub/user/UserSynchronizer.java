@@ -12,19 +12,22 @@ import java.util.Optional;
 @Slf4j
 public class UserSynchronizer {
 
+    private static final String SYNCHRONIZE_WITH_IDP_MSG = "Synchronizing user with IDP";
+    private static final String SYNCHRONIZE_USER_WITH_EMAIL_MSG = "Synchronizing user with email: {}";
+    private static final String EMAIL_NOT_FOUND_IN_TOKEN_MSG = "User synchronization skipped: Email not found in token";
     private final UserRepository userRepository;
     private final UserMapper userMapper;
 
     public void synchronizeWithIdp(Jwt token) {
-        log.info("Synchronizing user with IDP");
+        log.info(SYNCHRONIZE_WITH_IDP_MSG);
 
         getUserEmail(token).ifPresentOrElse(
                 userEmail -> {
-                    log.info("Synchronizing user with email: {}", userEmail);
+                    log.info(SYNCHRONIZE_USER_WITH_EMAIL_MSG, userEmail);
                     User user = userMapper.fromTokenAttributes(token.getClaims());
                     userRepository.save(user);
                 },
-                () -> log.warn("User synchronization skipped: Email not found in token")
+                () -> log.warn(EMAIL_NOT_FOUND_IN_TOKEN_MSG)
         );
     }
 

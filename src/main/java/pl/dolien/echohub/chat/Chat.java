@@ -1,10 +1,8 @@
 package pl.dolien.echohub.chat;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import pl.dolien.echohub.common.BaseAuditingEntity;
 import pl.dolien.echohub.message.Message;
 import pl.dolien.echohub.user.User;
@@ -23,6 +21,7 @@ import static pl.dolien.echohub.message.MessageType.TEXT;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder
 @Entity
 @Table(name = "chat")
 @NamedQuery(name = FIND_CHAT_BY_SENDER_ID,
