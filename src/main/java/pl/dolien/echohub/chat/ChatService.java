@@ -19,7 +19,7 @@ public class ChatService {
     private final ChatMapper mapper;
 
     @Transactional(readOnly = true)
-    public List<ChatResponse> getChatsByReceiverId(Authentication currentUser) {
+    public List<ChatResponse> getChatsByReceiver(Authentication currentUser) {
         final String userId = currentUser.getName();
         return repository.findChatsBySenderId(userId)
                 .stream()

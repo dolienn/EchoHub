@@ -1,10 +1,8 @@
 package pl.dolien.echohub.user;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
+import lombok.experimental.SuperBuilder;
 import pl.dolien.echohub.chat.Chat;
 import pl.dolien.echohub.common.BaseAuditingEntity;
 
@@ -17,6 +15,7 @@ import static pl.dolien.echohub.user.UserConstants.*;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder
 @Entity
 @Table(name = "users")
 @NamedQuery(name = FIND_USER_BY_EMAIL,

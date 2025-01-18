@@ -28,6 +28,6 @@ public class ChatController {
 
     @GetMapping
     public List<ChatResponse> getChatsByReceiver(Authentication auth) {
-        return chatService.getChatsByReceiverId(auth);
+        return chatService.getChatsByReceiver(auth);
     }
 }
