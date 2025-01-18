@@ -1,5 +1,6 @@
 package pl.dolien.echohub.chat;
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -15,12 +16,14 @@ import java.util.List;
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
 
 class ChatServiceTest {
 
     private static final String SENDER_ID = "1";
     private static final String RECIPIENT_ID = "2";
+    private static final String CHAT_NOT_FOUND_MSG = "Chat not found.";
     @InjectMocks
     private ChatService chatService;
     @Mock
@@ -71,6 +74,26 @@ class ChatServiceTest {
 
         assertEquals("1", result);
         verify(repository, times(1)).findChatByReceiverAndSender(SENDER_ID, RECIPIENT_ID);
+    }
+
+    @Test
+    void shouldReturnChatById() {
+        when(repository.findById(chat.getId())).thenReturn(of(chat));
+
+        Chat result = chatService.getChatById(chat.getId());
+
+        assertEquals(chat, result);
+        verify(repository, times(1)).findById(chat.getId());
+    }
+
+    @Test
+    void shouldThrowExceptionWhenChatNotFound() {
+        when(repository.findById(chat.getId())).thenReturn(empty());
+
+        var exception = assertThrows(EntityNotFoundException.class, () -> chatService.getChatById(chat.getId()));
+
+        assertEquals(CHAT_NOT_FOUND_MSG, exception.getMessage());
+        verify(repository, times(1)).findById(chat.getId());
     }
 
     private void initData() {

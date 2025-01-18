@@ -23,6 +23,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 class ChatControllerTest {
 
+    private final ObjectMapper objectMapper = new ObjectMapper();
     @InjectMocks
     private ChatController controller;
     @Mock
@@ -30,7 +31,6 @@ class ChatControllerTest {
     @Mock
     private Authentication auth;
     private MockMvc mockMvc;
-    private final ObjectMapper objectMapper = new ObjectMapper();
 
     @BeforeEach
     void setUp() {

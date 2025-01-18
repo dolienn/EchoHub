@@ -5,6 +5,7 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 import pl.dolien.echohub.chat.Chat;
 import pl.dolien.echohub.common.BaseAuditingEntity;
 
@@ -17,6 +18,7 @@ import static pl.dolien.echohub.message.MessageConstants.SET_MESSAGES_TO_SEEN_BY
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder
 @Entity
 @Table(name = "messages")
 @NamedQuery(name = FIND_MESSAGES_BY_CHAT_ID,
