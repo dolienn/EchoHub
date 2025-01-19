@@ -12,6 +12,8 @@ import pl.dolien.echohub.chat.ChatService;
 import pl.dolien.echohub.file.FileService;
 import pl.dolien.echohub.message.dto.MessageRequest;
 import pl.dolien.echohub.message.dto.MessageResponse;
+import pl.dolien.echohub.notification.Notification;
+import pl.dolien.echohub.notification.NotificationService;
 import pl.dolien.echohub.user.User;
 
 import java.util.List;
@@ -37,6 +39,8 @@ class MessageServiceTest {
     @Mock
     private FileService fileService;
     @Mock
+    private NotificationService notificationService;
+    @Mock
     private Authentication auth;
     private Chat chat;
 
@@ -55,13 +59,14 @@ class MessageServiceTest {
 
         messageService.saveMessage(messageRequest);
 
-        // todo asserts
         verify(repository, times(1)).save(any(Message.class));
         verify(chatService, times(1)).getChatById(CHAT_ID);
+        verify(notificationService, times(1))
+                .sendNotification(anyString(), any(Notification.class));
     }
 
     @Test
-    void shouldGetChatMessages() {
+    void shouldReturnChatMessages() {
         Message message = getTextMessage();
 
         when(repository.findMessagesByChatId(CHAT_ID)).thenReturn(List.of(message));
@@ -79,9 +84,10 @@ class MessageServiceTest {
 
         messageService.setMessagesToSeen(CHAT_ID, auth);
 
-        // todo asserts
         verify(chatService, times(1)).getChatById(CHAT_ID);
         verify(repository, times(1)).setMessagesToSeenByChat(CHAT_ID, SEEN);
+        verify(notificationService, times(1))
+                .sendNotification(anyString(), any(Notification.class));
     }
 
     @Test
@@ -93,11 +99,12 @@ class MessageServiceTest {
 
         messageService.uploadMediaMessage(CHAT_ID, file, auth);
 
-        // todo asserts
         verify(chatService, times(1)).getChatById(CHAT_ID);
         verify(fileService, times(1)).saveFile(file, SENDER_ID);
         verify(auth, times(2)).getName();
         verify(repository, times(1)).save(any(Message.class));
+        verify(notificationService, times(1))
+                .sendNotification(anyString(), any(Notification.class));
     }
 
     private void initData() {
