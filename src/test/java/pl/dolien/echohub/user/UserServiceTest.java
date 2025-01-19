@@ -6,7 +6,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.core.Authentication;
 
+import java.util.List;
 import java.util.Optional;
 
 import static java.util.Optional.of;
@@ -21,7 +23,10 @@ class UserServiceTest {
     private UserService userService;
     @Mock
     private UserRepository userRepository;
+    @Mock
+    private Authentication auth;
     private User user;
+    private UserResponse userResponse;
 
     @BeforeEach
     void setUp() {
@@ -48,9 +53,38 @@ class UserServiceTest {
         assertEquals(String.format(USER_NOT_FOUND, user.getId()), exception.getMessage());
     }
 
+    @Test
+    void shouldReturnAllUsersExceptSelf() {
+        mockGetAllUsersExceptSelf();
+
+        List<UserResponse> users = userService.getAllUsersExceptSelf(auth);
+
+        assertGetAllUsersExceptSelf(users);
+        verifyGetAllUsersExceptSelf();
+    }
+
+    private void mockGetAllUsersExceptSelf() {
+        when(auth.getName()).thenReturn(user.getId());
+        when(userRepository.findAllUsersExceptSelf(user.getId())).thenReturn(List.of(user));
+    }
+
+    private void verifyGetAllUsersExceptSelf() {
+        verify(auth, times(1)).getName();
+        verify(userRepository, times(1)).findAllUsersExceptSelf(user.getId());
+    }
+
+    private void assertGetAllUsersExceptSelf(List<UserResponse> users) {
+        assertEquals(List.of(userResponse).size(), users.size());
+        assertEquals(userResponse.getId(), users.get(0).getId());
+    }
+
     private void initUser() {
         user = User.builder()
                 .id("1")
+                .build();
+
+        userResponse = UserResponse.builder()
+                .id(user.getId())
                 .build();
     }
 }

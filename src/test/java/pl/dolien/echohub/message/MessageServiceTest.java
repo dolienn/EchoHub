@@ -38,7 +38,6 @@ class MessageServiceTest {
     private FileService fileService;
     @Mock
     private Authentication auth;
-    private Message message;
     private Chat chat;
 
     @BeforeEach
@@ -63,7 +62,7 @@ class MessageServiceTest {
 
     @Test
     void shouldGetChatMessages() {
-        message = getTextMessage();
+        Message message = getTextMessage();
 
         when(repository.findMessagesByChatId(CHAT_ID)).thenReturn(List.of(message));
 
