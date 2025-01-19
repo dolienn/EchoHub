@@ -10,12 +10,18 @@ import pl.dolien.echohub.chat.ChatService;
 import pl.dolien.echohub.file.FileService;
 import pl.dolien.echohub.message.dto.MessageRequest;
 import pl.dolien.echohub.message.dto.MessageResponse;
+import pl.dolien.echohub.notification.Notification;
+import pl.dolien.echohub.notification.NotificationService;
+import pl.dolien.echohub.notification.NotificationType;
 
 import java.util.List;
 
+import static pl.dolien.echohub.file.FileUtils.readFileFromLocation;
+import static pl.dolien.echohub.message.MessageBuilder.buildMessage;
 import static pl.dolien.echohub.message.MessageState.SEEN;
-import static pl.dolien.echohub.message.MessageState.SENT;
 import static pl.dolien.echohub.message.MessageType.IMAGE;
+import static pl.dolien.echohub.notification.NotificationBuilder.buildNotification;
+import static pl.dolien.echohub.notification.NotificationType.MESSAGE;
 
 @Service
 @RequiredArgsConstructor
@@ -24,20 +30,15 @@ public class MessageService {
     private final MessageRepository repository;
     private final ChatService chatService;
     private final FileService fileService;
+    private final NotificationService notificationService;
 
     public void saveMessage(MessageRequest messageRequest) {
         Chat chat = chatService.getChatById(messageRequest.getChatId());
 
-        Message message = new Message();
-        message.setContent(messageRequest.getContent());
-        message.setChat(chat);
-        message.setSenderId(message.getSenderId());
-        message.setReceiverId(message.getReceiverId());
-        message.setType(messageRequest.getType());
-        message.setState(SENT);
-        repository.save(message);
+        buildAndSaveMessage(chat, messageRequest);
 
-        // todo notification
+        Notification notification = buildNotificationToSend(chat, messageRequest);
+        notificationService.sendNotification(messageRequest.getReceiverId(), notification);
     }
 
     public List<MessageResponse> getChatMessages(String chatId) {
@@ -51,34 +52,75 @@ public class MessageService {
     public void setMessagesToSeen(String chatId, Authentication auth) {
         Chat chat = chatService.getChatById(chatId);
 
-        // final String recipientId = getRecipientId(chat, auth.getName());
+        final String recipientId = getRecipientId(chat, auth.getName());
+        final String senderId = getSenderId(chat, auth.getName());
 
         repository.setMessagesToSeenByChat(chatId, SEEN);
 
-        // todo notification
+        Notification notification = buildNotification(
+                chat,
+                senderId,
+                recipientId,
+                NotificationType.SEEN,
+                null,
+                null,
+                null);
+        notificationService.sendNotification(recipientId, notification);
     }
 
-    public void uploadMediaMessage(String chatId,
-                                   MultipartFile file,
-                                   Authentication auth
+    public void uploadMediaMessage(
+            String chatId,
+            MultipartFile file,
+            Authentication auth
     ) {
         Chat chat = chatService.getChatById(chatId);
 
         final String senderId = getSenderId(chat, auth.getName());
         final String recipientId = getRecipientId(chat, auth.getName());
-
         final String filePath = fileService.saveFile(file, senderId);
 
-        Message message = new Message();
-        message.setChat(chat);
-        message.setSenderId(senderId);
-        message.setReceiverId(recipientId);
-        message.setType(IMAGE);
-        message.setState(SENT);
-        message.setMediaFilePath(filePath);
+        Message message = buildMessage(
+                chat,
+                senderId,
+                recipientId,
+                IMAGE,
+                null,
+                filePath
+        );
         repository.save(message);
 
-        //todo notification
+        Notification notification = buildNotification(
+                chat,
+                senderId,
+                recipientId,
+                NotificationType.IMAGE,
+                null,
+                IMAGE,
+                readFileFromLocation(filePath));
+        notificationService.sendNotification(recipientId, notification);
+    }
+
+    private void buildAndSaveMessage(Chat chat, MessageRequest messageRequest) {
+        Message message = buildMessage(
+                chat,
+                messageRequest.getSenderId(),
+                messageRequest.getReceiverId(),
+                messageRequest.getType(),
+                messageRequest.getContent(),
+                null
+        );
+        repository.save(message);
+    }
+
+    public Notification buildNotificationToSend(Chat chat, MessageRequest messageRequest) {
+        return buildNotification(
+                chat,
+                messageRequest.getSenderId(),
+                messageRequest.getReceiverId(),
+                MESSAGE,
+                messageRequest.getContent(),
+                messageRequest.getType(),
+                null);
     }
 
     private String getSenderId(Chat chat, String authName) {

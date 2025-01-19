@@ -13,7 +13,6 @@ public class UserService {
 
     private static final String USER_NOT_FOUND = "User with id %s not found.";
     private final UserRepository userRepository;
-    private final UserMapper userMapper;
 
     public User findUserByPublicId(String userId) {
         return userRepository.findByPublicId(userId)
@@ -23,7 +22,7 @@ public class UserService {
     public List<UserResponse> getAllUsersExceptSelf(Authentication connectedUser) {
         return userRepository.findAllUsersExceptSelf(connectedUser.getName())
                 .stream()
-                .map(userMapper::toUserResponse)
+                .map(UserMapper::toUserResponse)
                 .toList();
     }
 }

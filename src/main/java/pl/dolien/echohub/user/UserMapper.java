@@ -1,14 +1,13 @@
 package pl.dolien.echohub.user;
 
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.util.Map;
 
-@Service
 public class UserMapper {
 
-    public User fromTokenAttributes(Map<String, Object> attributes) {
+    private UserMapper() {}
+
+    public static User fromTokenAttributes(Map<String, Object> attributes) {
         User user = new User();
 
         user.setId(getAttributeAsString(attributes, "sub"));
@@ -20,11 +19,11 @@ public class UserMapper {
         return user;
     }
 
-    private String getAttributeAsString(Map<String, Object> attributes, String key) {
+    private static String getAttributeAsString(Map<String, Object> attributes, String key) {
         return attributes.containsKey(key) ? attributes.get(key).toString() : null;
     }
 
-    private String resolveFirstName(Map<String, Object> attributes) {
+    private static String resolveFirstName(Map<String, Object> attributes) {
         if (attributes.containsKey("given_name")) {
             return attributes.get("given_name").toString();
         } else if (attributes.containsKey("nickname")) {
@@ -33,7 +32,7 @@ public class UserMapper {
         return null;
     }
 
-    public UserResponse toUserResponse(User user) {
+    public static UserResponse toUserResponse(User user) {
         return UserResponse.builder()
                 .id(user.getId())
                 .firstName(user.getFirstName())
