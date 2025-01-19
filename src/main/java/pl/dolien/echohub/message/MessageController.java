@@ -1,5 +1,7 @@
 package pl.dolien.echohub.message;
 
+import io.swagger.v3.oas.annotations.Parameter;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
@@ -15,6 +17,7 @@ import static org.springframework.http.HttpStatus.CREATED;
 @RestController
 @RequestMapping("/messages")
 @RequiredArgsConstructor
+@Tag(name = "Message")
 public class MessageController {
 
     private final MessageService service;
@@ -29,7 +32,7 @@ public class MessageController {
     @ResponseStatus(CREATED)
     public void uploadMedia(
             @RequestParam("chat-id") String chatId,
-            // todo add @Parameter from swagger
+            @Parameter()
             @RequestParam("file") MultipartFile file,
             Authentication auth
     ) {
