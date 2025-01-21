@@ -158,6 +158,13 @@ i {
   }
 }
 
+app-loader {
+  background-color: $background-color-02;
+  background-image: url("../../../../public/eh_bg.jpg");
+  background-size: cover;
+  color: white;
+}
+
 @media (max-width: 768px) {
   .message-media-img {
     width: 100% !important;

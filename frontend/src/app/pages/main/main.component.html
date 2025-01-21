@@ -42,7 +42,8 @@
                 }
               </div>
             </div>
-            <div #messages class="h-100 bg-chat p-3 overflow-x-auto" (click)="markMessagesAsSeen()">
+            <app-loader [isLoading]="isMessagesLoading" class="d-flex justify-content-center"></app-loader>
+            <div *ngIf="!isMessagesLoading" #messages class="h-100 bg-chat p-3 overflow-x-auto" (click)="markMessagesAsSeen()">
               @for (message of chatMessages; track message) {
                 @if (isSelfMessage(message)) {
                   <div class="message-box self">

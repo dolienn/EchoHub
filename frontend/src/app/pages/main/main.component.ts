@@ -7,11 +7,13 @@ import {MessageResponse} from "../../services/models/message-response";
 import {MessageRequest} from "../../services/models/message-request";
 import {MessageService} from "../../services/services/message.service";
 import {PickerComponent} from "@ctrl/ngx-emoji-mart";
-import {DatePipe} from "@angular/common";
+import {DatePipe, NgIf} from "@angular/common";
 import {ChatListComponent} from "../../components/chat-list/chat-list.component";
 import {FormsModule} from "@angular/forms";
 import {EmojiData} from "@ctrl/ngx-emoji-mart/ngx-emoji";
 import {WebSocketService} from "../../services/services/websocket.service";
+import {LoaderService} from "../../services/services/loader.service";
+import {LoaderComponent} from "../../components/loader/loader.component";
 
 @Component({
   selector: 'app-main',
@@ -20,7 +22,9 @@ import {WebSocketService} from "../../services/services/websocket.service";
     PickerComponent,
     DatePipe,
     ChatListComponent,
-    FormsModule
+    FormsModule,
+    LoaderComponent,
+    NgIf
   ],
   templateUrl: './main.component.html',
   styleUrl: './main.component.scss'
@@ -31,16 +35,17 @@ export class MainComponent implements OnInit, OnDestroy {
   selectedChat: ChatResponse = {};
   chats: Array<ChatResponse> = [];
   chatMessages: Array<MessageResponse> = [];
-  socketClient: any = null;
   messageContent: string = '';
-  showEmojis = false;
+  showEmojis: boolean = false;
+  isMessagesLoading: boolean = true;
   private notificationSubscription: any;
 
   constructor(
     private chatService: ChatService,
     private messageService: MessageService,
     private keycloakService: KeycloakService,
-    private webSocketService: WebSocketService
+    private webSocketService: WebSocketService,
+    private loaderService: LoaderService
   ) {
   }
 
@@ -211,19 +216,31 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   private loadChats() {
+    this.loaderService.setLoadingState(true);
     this.chatService.getChatsByReceiver().subscribe({
-      next: (res) => this.chats = res,
-      error: (err) => console.error('Error loading chats', err)
+      next: (res) => {
+        this.chats = res
+        this.loaderService.setLoadingState(false);
+      },
+      error: (err) => {
+        this.loaderService.setLoadingState(false);
+        console.error('Error loading chats', err);
+      }
     });
   }
 
   private loadMessages(chatId: string) {
+    this.isMessagesLoading = true;
     this.messageService.getMessages({'chat-id': chatId}).subscribe({
       next: (messages) => {
         this.chatMessages = messages;
+        this.isMessagesLoading = false;
         setTimeout(() => this.scrollToBottom(), 1);
       },
-      error: (err) => console.error('Error loading messages', err)
+      error: (err) => {
+        this.isMessagesLoading = false;
+        console.error('Error loading messages', err)
+      }
     });
   }
 

@@ -38,7 +38,9 @@
 </div>
 
 <div class="chat-list mt-3">
+  <app-loader [isLoading]="isChatsLoading" class="d-flex justify-content-center"></app-loader>
   <!-- All Chats -->
+  <ng-container *ngIf="!isChatsLoading">
   @if (chats().length && !searchNewContact && filterType === 'all') {
     @for (chat of chats(); track chat) {
       <div class="chat d-flex align-items-center justify-content-between border-bottom-gray p-2"
@@ -144,5 +146,6 @@
   } @else {
     <span class="p-2">Not chat yet..</span>
   }
+  </ng-container>
 
 </div>

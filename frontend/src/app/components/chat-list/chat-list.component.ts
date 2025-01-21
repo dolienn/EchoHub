@@ -1,4 +1,4 @@
-import {Component, input, InputSignal, OnInit, output} from '@angular/core';
+import {Component, input, InputSignal, OnInit, output, OutputEmitterRef} from '@angular/core';
 import {ChatResponse} from "../../services/models/chat-response";
 import {UserResponse} from "../../services/models/user-response";
 import {UserService} from "../../services/services/user.service";
@@ -6,13 +6,16 @@ import {ChatService} from "../../services/services/chat.service";
 import {KeycloakService} from "../../utils/keycloak/keycloak.service";
 import {StringResponse} from "../../services/models/string-response";
 import {DatePipe, NgIf} from "@angular/common";
+import {LoaderComponent} from "../loader/loader.component";
+import {LoaderService} from "../../services/services/loader.service";
 
 @Component({
   selector: 'app-chat-list',
   standalone: true,
   imports: [
     DatePipe,
-    NgIf
+    NgIf,
+    LoaderComponent
   ],
   templateUrl: './chat-list.component.html',
   styleUrl: './chat-list.component.scss'
@@ -20,8 +23,9 @@ import {DatePipe, NgIf} from "@angular/common";
 export class ChatListComponent implements OnInit {
 
   chats: InputSignal<ChatResponse[]> = input<ChatResponse[]>([]);
-  chatSelected = output<ChatResponse>();
+  chatSelected: OutputEmitterRef<ChatResponse> = output<ChatResponse>();
 
+  isChatsLoading: boolean = true;
   filteredChats: ChatResponse[] = [];
   searchNewContact: boolean = false;
   contacts: UserResponse[] = [];
@@ -32,12 +36,14 @@ export class ChatListComponent implements OnInit {
   constructor(
     private chatService: ChatService,
     private userService: UserService,
-    private keycloakService: KeycloakService
+    private keycloakService: KeycloakService,
+    private loaderService: LoaderService
   ) {
   }
 
   ngOnInit() {
     this.updateFilteredContacts();
+    this.subscribeToLoadingState();
   }
 
   searchContact(): void {
@@ -99,6 +105,12 @@ export class ChatListComponent implements OnInit {
   private updateFilteredContacts(): void {
     const chatUserIds = this.getChatUserIds();
     this.filteredContacts = this.contacts.filter(contact => !chatUserIds.has(contact.id as string));
+  }
+
+  private subscribeToLoadingState(): void {
+    this.loaderService.isChatsLoading$.subscribe((isLoading: boolean) => {
+      this.isChatsLoading = isLoading;
+    });
   }
 
   private getChatUserIds(): Set<string> {
