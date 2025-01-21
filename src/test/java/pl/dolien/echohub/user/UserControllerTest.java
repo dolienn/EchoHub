@@ -10,6 +10,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
+import pl.dolien.echohub.user.dto.UserResponse;
 
 import java.util.List;
 

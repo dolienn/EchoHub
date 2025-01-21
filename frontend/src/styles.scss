@@ -1,4 +1,14 @@
 /* You can add global styles to this file, and also import other style files */
 @import "bootstrap/dist/css/bootstrap.min.css";
 @import "@fortawesome/fontawesome-free/css/all.min.css";
+@import "@ctrl/ngx-emoji-mart/picker";
 // todo add the emoji styles
+$background-color-01: #52575D;
+$background-color-02: #41444B;
+$color-primary-01: #FBFBFB;
+$color-primary-02: #DFD8C8;
+$color-primary-03: #CABFAB;
+$color-primary-04: #F2F1F1;
+$color-online: #77B254;
+$color-offline: #E4E0E1;
+$color-01: black;

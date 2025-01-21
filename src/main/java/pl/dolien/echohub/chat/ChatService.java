@@ -9,6 +9,7 @@ import pl.dolien.echohub.chat.dto.ChatResponse;
 import pl.dolien.echohub.user.User;
 import pl.dolien.echohub.user.UserService;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -23,6 +24,10 @@ public class ChatService {
     @Transactional(readOnly = true)
     public List<ChatResponse> getChatsByReceiver(Authentication currentUser) {
         final String userId = currentUser.getName();
+        User user = userService.findUserByPublicId(userId);
+        user.setLastSeen(LocalDateTime.now());
+        userService.saveUser(user);
+
         return repository.findChatsBySenderId(userId)
                 .stream()
                 .map(chat -> mapper.toChatResponse(chat, userId))

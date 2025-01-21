@@ -1,5 +1,7 @@
 package pl.dolien.echohub.user;
 
+import pl.dolien.echohub.user.dto.UserResponse;
+
 import java.time.LocalDateTime;
 import java.util.Map;
 

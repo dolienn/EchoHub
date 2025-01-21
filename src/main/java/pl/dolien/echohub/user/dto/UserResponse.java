@@ -1,4 +1,4 @@
-package pl.dolien.echohub.user;
+package pl.dolien.echohub.user.dto;
 
 import lombok.*;
 

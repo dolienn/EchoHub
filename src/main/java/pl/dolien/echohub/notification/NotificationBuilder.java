@@ -23,7 +23,7 @@ public class NotificationBuilder {
                 .content(content)
                 .senderId(senderId)
                 .receiverId(receiverId)
-                .chatName(chat.getChatName(senderId))
+                .chatName(chat.getTargetChatName(senderId))
                 .media(media)
                 .build();
     }

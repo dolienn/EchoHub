@@ -12,7 +12,7 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.List;
 
 import static org.springframework.http.HttpHeaders.*;
 import static org.springframework.security.config.Customizer.withDefaults;
@@ -59,7 +59,7 @@ public class SecurityConfig {
     private UrlBasedCorsConfigurationSource createCorsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
         config.setAllowCredentials(true);
-        config.setAllowedOrigins(Collections.singletonList(angularUrl));
+        config.setAllowedOrigins(List.of(angularUrl, "http://192.168.1.162:4400"));
         config.setAllowedHeaders(Arrays.asList(ORIGIN, CONTENT_TYPE, ACCEPT, AUTHORIZATION));
         config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
 

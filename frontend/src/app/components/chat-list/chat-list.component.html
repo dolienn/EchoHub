@@ -1,0 +1,148 @@
+<div class="sticky-top bg-white">
+  <div class="d-flex justify-content-between align-items-center gap-2 p-2">
+    <h4>Chat</h4>
+      <i *ngIf="!searchNewContact" class="fas fa-comment-medical cursor-pointer" (click)="searchContact()"></i>
+      <i *ngIf="searchNewContact" class="fas fa-times-circle cursor-pointer" (click)="searchNewContact = false"></i>
+  </div>
+
+  <div class="d-flex flex-column gap-1 p-2">
+    <!-- Search Input -->
+    <div class="input-group">
+      <span class="input-group-text">
+        <i class="fas fa-search"></i>
+      </span>
+      <input
+        type="text"
+        class="form-control-sm"
+        placeholder="Search in the chat"
+        aria-label="Search"
+        (input)="onSearchChange($event)">
+    </div>
+
+    <!-- Filter Options -->
+    <div class="filter-types-box d-flex gap-2">
+      <span
+        class="badge rounded-pill text-bg-light cursor-pointer"
+        [class.text-bg-dark]="filterType === 'all'"
+        (click)="changeFilterType('all')">All</span>
+      <span
+        class="badge rounded-pill text-bg-light cursor-pointer"
+        [class.text-bg-dark]="filterType === 'unread'"
+        (click)="changeFilterType('unread')">Unread</span>
+      <span
+        class="badge rounded-pill text-bg-light cursor-pointer"
+        [class.text-bg-dark]="filterType === 'favorites'"
+        (click)="changeFilterType('favorites')">Favorites</span>
+    </div>
+  </div>
+</div>
+
+<div class="chat-list mt-3">
+  <!-- All Chats -->
+  @if (chats().length && !searchNewContact && filterType === 'all') {
+    @for (chat of chats(); track chat) {
+      <div class="chat d-flex align-items-center justify-content-between border-bottom-gray p-2"
+           (click)="chatClicked(chat)">
+        <div class="user-info-box d-flex gap-2">
+          <div class="user-img">
+            <img src="user.png" alt="">
+          </div>
+          <div class="user-info-box d-flex flex-column">
+            <span class="chat-name">{{ chat.name }}</span>
+            <small class="text-secondary">
+              @if (chat.lastMessage === undefined || chat.lastMessage == null) {
+                @if (chat.recipientOnline) {
+                  <div class="d-flex align-items-center">
+                    <small class="online-status me-1"></small>
+                    <small>Online</small>
+                  </div>
+                } @else {
+                  <div class="d-flex align-items-center">
+                    <small class="offline-status me-1"></small>
+                    <small>Offline</small>
+                  </div>
+                }
+              } @else {
+                @if (chat.lastMessage === 'Attachment') {
+                  <i class="fas fa-image"></i>
+                }
+                {{ wrapMessage(chat.lastMessage) }}
+              }
+            </small>
+          </div>
+        </div>
+        <div class="msg-date-box d-flex flex-column align-items-end">
+          <span class="msg-date" [class.unread]="chat.unreadCount && chat.unreadCount > 0">{{ chat.lastMessageTime | date:'dd.MM.yy HH:mm' }}</span>
+          @if (chat.unreadCount && chat.unreadCount > 0) {
+            <small class="unread-msg-badge">{{ chat.unreadCount }}</small>
+          }
+        </div>
+      </div>
+    }
+  } @else if (chats().length && !searchNewContact && (filterType === 'unread' || filterType === 'search')) {
+    @for (chat of filteredChats; track chat) {
+      <div class="user-info-box d-flex align-items-center justify-content-between border-bottom-gray p-2"
+           (click)="chatClicked(chat)">
+        <div class="d-flex gap-2">
+          <div class="user-img">
+            <img src="user.png" alt="">
+          </div>
+          <div class="user-info-box d-flex flex-column">
+            <span class="chat-name">{{ chat.name }}</span>
+            <small class="text-secondary">
+              @if (chat.lastMessage === undefined || chat.lastMessage == null) {
+                @if (chat.recipientOnline) {
+                  <div class="d-flex align-items-center">
+                    <small class="online-status me-1"></small>
+                    <small>Online</small>
+                  </div>
+                } @else {
+                  <div class="d-flex align-items-center">
+                    <small class="offline-status me-1"></small>
+                    <small>Offline</small>
+                  </div>
+                }
+              } @else {
+                @if (chat.lastMessage === 'Attachment') {
+                  <i class="fas fa-image"></i>
+                }
+                {{ wrapMessage(chat.lastMessage) }}
+              }
+            </small>
+          </div>
+        </div>
+        <div class="d-flex flex-column align-items-end">
+          <span class="msg-date" [class.unread]="chat.unreadCount && chat.unreadCount > 0">{{ chat.lastMessageTime | date:'dd.MM.yy HH:mm' }}</span>
+          @if (chat.unreadCount && chat.unreadCount > 0) {
+            <small class="unread-msg-badge">{{ chat.unreadCount }}</small>
+          }
+        </div>
+      </div>
+    }
+  } @else if (searchNewContact && filteredContacts.length) {
+    @for (contact of filteredContacts; track contact) {
+      <div class="d-flex align-items-center justify-content-between border-bottom-gray p-2"
+           (click)="selectContact(contact)">
+        <div class="d-flex gap-2">
+          <div class="user-img">
+            <img src="user.png" alt="">
+          </div>
+          <div class="d-flex flex-column">
+            <span>{{ contact.firstName + ' ' + contact.lastName }}</span>
+            @if (contact.online) {
+              <small class="text-secondary">Online</small>
+            } @else {
+              <small class="text-secondary">Last seen&nbsp;{{ contact.lastSeen | date:'dd.MM.yyyy HH:mm' }}</small>
+            }
+
+          </div>
+        </div>
+      </div>
+    }
+  } @else if (searchNewContact) {
+    <span class="p-2">No contacts found.</span>
+  } @else {
+    <span class="p-2">Not chat yet..</span>
+  }
+
+</div>

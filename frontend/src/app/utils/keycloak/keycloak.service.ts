@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
 import Keycloak from "keycloak-js";
+import {environment} from "../../../environments/environment";
 
 @Injectable({
   providedIn: 'root'
@@ -13,7 +14,7 @@ export class KeycloakService {
   get keycloak(): Keycloak {
     if(!this._keycloak) {
       this._keycloak = new Keycloak({
-        url: 'http://localhost:9090',
+        url: environment.keycloakBaseUrl,
         realm: 'echohub',
         clientId: 'echohub-app'
       })
@@ -22,7 +23,7 @@ export class KeycloakService {
   }
 
   async init() {
-    const authenticated = await this.keycloak.init({
+    await this.keycloak.init({
       onLoad: 'login-required'
     });
   }
@@ -45,7 +46,7 @@ export class KeycloakService {
 
   logout() {
     return this.keycloak.logout({
-      redirectUri: 'http://localhost:4400'
+      redirectUri: environment.angularBaseUrl
     });
   }
 

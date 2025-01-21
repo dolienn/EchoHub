@@ -7,6 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.security.core.Authentication;
+import pl.dolien.echohub.user.dto.UserResponse;
 
 import java.util.List;
 import java.util.Optional;
