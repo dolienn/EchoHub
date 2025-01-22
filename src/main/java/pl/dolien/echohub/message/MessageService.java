@@ -19,7 +19,7 @@ import java.util.List;
 import static pl.dolien.echohub.file.FileUtils.readFileFromLocation;
 import static pl.dolien.echohub.message.MessageBuilder.buildMessage;
 import static pl.dolien.echohub.message.MessageState.SEEN;
-import static pl.dolien.echohub.message.MessageType.IMAGE;
+import static pl.dolien.echohub.message.MessageType.*;
 import static pl.dolien.echohub.notification.NotificationBuilder.buildNotification;
 import static pl.dolien.echohub.notification.NotificationType.MESSAGE;
 
@@ -71,9 +71,13 @@ public class MessageService {
     public void uploadMediaMessage(
             String chatId,
             MultipartFile file,
-            Authentication auth
+            Authentication auth,
+            String mediaType
     ) {
         Chat chat = chatService.getChatById(chatId);
+
+        var messageType = getMessageType(mediaType);
+        var notificationType = getNotificationType(mediaType);
 
         final String senderId = getSenderId(chat, auth.getName());
         final String recipientId = getRecipientId(chat, auth.getName());
@@ -83,7 +87,7 @@ public class MessageService {
                 chat,
                 senderId,
                 recipientId,
-                IMAGE,
+                messageType,
                 null,
                 filePath
         );
@@ -93,11 +97,41 @@ public class MessageService {
                 chat,
                 senderId,
                 recipientId,
-                NotificationType.IMAGE,
+                notificationType,
                 null,
-                IMAGE,
+                messageType,
                 readFileFromLocation(filePath));
         notificationService.sendNotification(recipientId, notification);
+    }
+
+    private MessageType getMessageType(String fileType) {
+        switch (fileType) {
+            case "AUDIO" -> {
+                return AUDIO;
+            }
+            case "IMAGE" -> {
+                return IMAGE;
+            }
+            case "VIDEO" -> {
+                return VIDEO;
+            }
+            default -> throw new UnsupportedOperationException("Unsupported file type: " + fileType);
+        }
+    }
+
+    private NotificationType getNotificationType(String fileType){
+        switch (fileType) {
+            case "AUDIO" -> {
+                return NotificationType.AUDIO;
+            }
+            case "IMAGE" -> {
+                return NotificationType.IMAGE;
+            }
+            case "VIDEO" -> {
+                return NotificationType.VIDEO;
+            }
+            default -> throw new UnsupportedOperationException("Unsupported file type: " + fileType);
+        }
     }
 
     private void buildAndSaveMessage(Chat chat, MessageRequest messageRequest) {

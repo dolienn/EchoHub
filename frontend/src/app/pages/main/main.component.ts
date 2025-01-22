@@ -7,13 +7,16 @@ import {MessageResponse} from "../../services/models/message-response";
 import {MessageRequest} from "../../services/models/message-request";
 import {MessageService} from "../../services/services/message.service";
 import {PickerComponent} from "@ctrl/ngx-emoji-mart";
-import {DatePipe, NgIf} from "@angular/common";
+import {DatePipe, NgClass, NgIf} from "@angular/common";
 import {ChatListComponent} from "../../components/chat-list/chat-list.component";
 import {FormsModule} from "@angular/forms";
 import {EmojiData} from "@ctrl/ngx-emoji-mart/ngx-emoji";
+import {LoaderComponent} from "../../components/loader/loader.component";
 import {WebSocketService} from "../../services/services/websocket.service";
 import {LoaderService} from "../../services/services/loader.service";
-import {LoaderComponent} from "../../components/loader/loader.component";
+import {AudioRecorderService} from "../../services/services/audio-recorder.service";
+import {MediaUploaderService} from "../../services/services/media-uploader.service";
+import {ScrollerService} from "../../services/services/scroller.service";
 
 @Component({
   selector: 'app-main',
@@ -24,7 +27,8 @@ import {LoaderComponent} from "../../components/loader/loader.component";
     ChatListComponent,
     FormsModule,
     LoaderComponent,
-    NgIf
+    NgIf,
+    NgClass
   ],
   templateUrl: './main.component.html',
   styleUrl: './main.component.scss'
@@ -32,27 +36,27 @@ import {LoaderComponent} from "../../components/loader/loader.component";
 export class MainComponent implements OnInit, OnDestroy {
   @ViewChild('messages') messagesRef!: ElementRef;
 
-  selectedChat: ChatResponse = {};
-  chats: Array<ChatResponse> = [];
-  chatMessages: Array<MessageResponse> = [];
-  messageContent: string = '';
-  showEmojis: boolean = false;
-  isMessagesLoading: boolean = true;
   private notificationSubscription: any;
+
+  chats: Array<ChatResponse> = [];
+  isMessagesLoading: boolean = true;
 
   constructor(
     private chatService: ChatService,
     private messageService: MessageService,
     private keycloakService: KeycloakService,
     private webSocketService: WebSocketService,
-    private loaderService: LoaderService
+    private loaderService: LoaderService,
+    protected audioRecorderService: AudioRecorderService,
+    protected mediaUploaderService: MediaUploaderService,
+    private scrollerService: ScrollerService
   ) {
   }
 
   ngOnInit(): void {
     this.initWebSocket();
     this.loadChats();
-    setTimeout(() => this.scrollToBottom(), 1);
+    setTimeout(() => this.scrollerService.scrollToBottom(this.messagesRef), 1);
   }
 
   ngOnDestroy(): void {
@@ -61,15 +65,15 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   chatSelected(chatResponse: ChatResponse): void {
-    this.selectedChat = chatResponse;
+    this.mediaUploaderService.selectedChat = chatResponse;
     this.loadMessages(chatResponse.id!);
     this.markMessagesAsSeen();
   }
 
   markMessagesAsSeen(): void {
-    if (this.selectedChat.id) {
-      this.messageService.setMessagesToSeen({ 'chat-id': this.selectedChat.id }).subscribe();
-      this.selectedChat.unreadCount = 0;
+    if (this.mediaUploaderService.selectedChat.id) {
+      this.messageService.setMessagesToSeen({ 'chat-id': this.mediaUploaderService.selectedChat.id }).subscribe();
+      this.mediaUploaderService.selectedChat.unreadCount = 0;
     }
   }
 
@@ -84,7 +88,7 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   sendMessage(): void {
-    if (this.messageContent.trim()) {
+    if (this.mediaUploaderService.messageContent.trim()) {
       const messageRequest: MessageRequest = this.createMessageRequest();
       this.messageService.saveMessage({ body: messageRequest }).subscribe({
         next: () => this.onMessageSent(),
@@ -95,16 +99,11 @@ export class MainComponent implements OnInit, OnDestroy {
 
   onSelectEmojis(emojiSelected: any) {
     const emoji: EmojiData = emojiSelected.emoji;
-    this.messageContent += emoji.native;
+    this.mediaUploaderService.messageContent += emoji.native;
   }
 
   uploadMedia(target: EventTarget | null): void {
-    const file = this.extractFileFromTarget(target);
-    if (file) {
-      const reader = new FileReader();
-      reader.onload = () => this.uploadMediaContent(reader.result, file);
-      reader.readAsDataURL(file);
-    }
+    this.mediaUploaderService.uploadMedia(target);
   }
 
   logout(): void {
@@ -115,11 +114,8 @@ export class MainComponent implements OnInit, OnDestroy {
     this.keycloakService.accountManagement();
   }
 
-  scrollToBottom() {
-    if (this.messagesRef?.nativeElement) {
-      const messages = this.messagesRef.nativeElement;
-      messages.scrollTop = messages.scrollHeight;
-    }
+  toggleRecording(): void {
+    this.audioRecorderService.toggleRecording();
   }
 
   private initWebSocket(): void {
@@ -137,7 +133,7 @@ export class MainComponent implements OnInit, OnDestroy {
 
   private handleNotification(notification: Notification) {
     if (!notification) return;
-    if (this.selectedChat && this.selectedChat.id === notification.chatId) {
+    if (this.mediaUploaderService.selectedChat && this.mediaUploaderService.selectedChat.id === notification.chatId) {
       this.handleChatNotification(notification);
     } else {
       this.handleGeneralNotification(notification);
@@ -148,17 +144,19 @@ export class MainComponent implements OnInit, OnDestroy {
     switch (notification.type) {
       case 'MESSAGE':
       case 'IMAGE':
+      case 'AUDIO':
+      case 'VIDEO':
         this.addMessage(notification);
         break;
       case 'SEEN':
-        this.chatMessages.forEach(m => m.state = 'SEEN');
+        this.mediaUploaderService.chatMessages.forEach(m => m.state = 'SEEN');
         break;
     }
   }
 
   private addMessage(notification: Notification): void {
     const message: MessageResponse = this.createMessageResponseByNotification(notification);
-    this.chatMessages.push(message);
+    this.mediaUploaderService.chatMessages.push(message);
     this.updateChatLastMessage(notification);
   }
 
@@ -174,10 +172,15 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   private updateChatLastMessage(notification: Notification): void {
+    console.log(notification.type);
     if (notification.type === 'IMAGE') {
-      this.selectedChat.lastMessage = 'Attachment';
+      this.mediaUploaderService.selectedChat.lastMessage = 'Attachment';
+    } else if (notification.type === 'AUDIO') {
+      this.mediaUploaderService.selectedChat.lastMessage = 'Audio';
+    } else if (notification.type === 'VIDEO') {
+      this.mediaUploaderService.selectedChat.lastMessage = 'Video';
     } else {
-      this.selectedChat.lastMessage = notification.content;
+      this.mediaUploaderService.selectedChat.lastMessage = notification.content;
     }
   }
 
@@ -196,6 +199,10 @@ export class MainComponent implements OnInit, OnDestroy {
       destChat.lastMessage = notification.content;
     } else if (notification.type === 'IMAGE') {
       destChat.lastMessage = 'Attachment';
+    } else if (notification.type === 'AUDIO') {
+      destChat.lastMessage = 'Audio';
+    } else if (notification.type === 'VIDEO') {
+      destChat.lastMessage = 'Video';
     }
 
     destChat.lastMessageTime = new Date().toISOString();
@@ -233,9 +240,9 @@ export class MainComponent implements OnInit, OnDestroy {
     this.isMessagesLoading = true;
     this.messageService.getMessages({'chat-id': chatId}).subscribe({
       next: (messages) => {
-        this.chatMessages = messages;
+        this.mediaUploaderService.chatMessages = messages;
         this.isMessagesLoading = false;
-        setTimeout(() => this.scrollToBottom(), 1);
+        setTimeout(() => this.scrollerService.scrollToBottom(this.messagesRef), 1);
       },
       error: (err) => {
         this.isMessagesLoading = false;
@@ -246,81 +253,29 @@ export class MainComponent implements OnInit, OnDestroy {
 
   private createMessageRequest(): MessageRequest {
     return {
-      chatId: this.selectedChat.id!,
-      senderId: this.getSenderId(),
-      receiverId: this.getReceiverId(),
-      content: this.messageContent,
+      chatId: this.mediaUploaderService.selectedChat.id!,
+      senderId: this.mediaUploaderService.getSenderId(),
+      receiverId: this.mediaUploaderService.getReceiverId(),
+      content: this.mediaUploaderService.messageContent,
       type: 'TEXT'
     };
   }
 
-  private getSenderId(): string {
-    if (this.selectedChat.senderId === this.keycloakService.userId) {
-      return this.selectedChat.senderId as string;
-    }
-    return this.selectedChat.receiverId as string;
-  }
-
-  private getReceiverId(): string {
-    if (this.selectedChat.senderId === this.keycloakService.userId) {
-      return this.selectedChat.receiverId as string;
-    }
-    return this.selectedChat.senderId as string;
-  }
-
   private onMessageSent(): void {
     const message: MessageResponse = this.createMessageResponse('SENT');
-    this.chatMessages.push(message);
-    this.selectedChat.lastMessage = this.messageContent;
-    this.resetMessageContent();
+    this.mediaUploaderService.chatMessages.push(message);
+    this.mediaUploaderService.selectedChat.lastMessage = this.mediaUploaderService.messageContent;
+    this.mediaUploaderService.resetMessageContent(this.messagesRef);
   }
 
   private createMessageResponse(state: "SENT" | "SEEN" | undefined): MessageResponse {
     return {
-      senderId: this.getSenderId(),
-      receiverId: this.getReceiverId(),
-      content: this.messageContent,
+      senderId: this.mediaUploaderService.getSenderId(),
+      receiverId: this.mediaUploaderService.getReceiverId(),
+      content: this.mediaUploaderService.messageContent,
       type: 'TEXT',
       state: state,
       createdAt: new Date().toISOString()
     };
-  }
-
-  private resetMessageContent(): void {
-    this.messageContent = '';
-    this.showEmojis = false;
-    setTimeout(() => this.scrollToBottom(), 1);
-  }
-
-  private extractFileFromTarget(target: EventTarget | null): File | null {
-    const htmlInputTarget = target as HTMLInputElement;
-    if (target === null || htmlInputTarget.files === null) {
-      return null;
-    }
-    return htmlInputTarget.files[0];
-  }
-
-  private uploadMediaContent(readerResult: any, file: File): void {
-    const mediaLines = readerResult?.toString().split(',')[1];
-
-    this.messageService.uploadMedia({
-      'chat-id': this.selectedChat.id as string,
-      body: { file }
-    }).subscribe({
-      next: () => this.addUploadedMediaMessage(mediaLines),
-    });
-  }
-
-  private addUploadedMediaMessage(mediaLines: string): void {
-    const message: MessageResponse = {
-      senderId: this.getSenderId(),
-      receiverId: this.getReceiverId(),
-      content: 'Attachment',
-      type: 'IMAGE',
-      state: 'SENT',
-      media: [mediaLines],
-      createdAt: new Date().toISOString()
-    };
-    this.chatMessages.push(message);
   }
 }

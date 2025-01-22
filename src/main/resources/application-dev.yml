@@ -21,7 +21,8 @@ spring:
           issuer-uri: ${ISSUER_URI}
   servlet:
     multipart:
-      max-file-size: 50MB
+      max-file-size: 1GB
+      max-request-size: 1GB
 
 springdoc:
   default-produces-media-type: application/json

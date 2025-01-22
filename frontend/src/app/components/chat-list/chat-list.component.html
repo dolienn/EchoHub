@@ -67,6 +67,10 @@
               } @else {
                 @if (chat.lastMessage === 'Attachment') {
                   <i class="fas fa-image"></i>
+                } @else if (chat.lastMessage === 'Audio') {
+                <i class="fa-solid fa-microphone"></i>
+                } @else if (chat.lastMessage === 'Video') {
+                  <i class="fa-solid fa-video"></i>
                 }
                 {{ wrapMessage(chat.lastMessage) }}
               }
@@ -107,6 +111,10 @@
               } @else {
                 @if (chat.lastMessage === 'Attachment') {
                   <i class="fas fa-image"></i>
+                } @else if (chat.lastMessage === 'Audio') {
+                  <i class="fa-solid fa-microphone"></i>
+                } @else if (chat.lastMessage === 'Video') {
+                  <i class="fa-solid fa-video"></i>
                 }
                 {{ wrapMessage(chat.lastMessage) }}
               }

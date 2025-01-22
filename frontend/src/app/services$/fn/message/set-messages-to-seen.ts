@@ -9,20 +9,14 @@ import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
 
-export interface UploadMedia$Params {
+export interface SetMessagesToSeen$Params {
   'chat-id': string;
-  'media-type': string;
-      body?: {
-'file': Blob;
-}
 }
 
-export function uploadMedia(http: HttpClient, rootUrl: string, params: UploadMedia$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
-  const rb = new RequestBuilder(rootUrl, uploadMedia.PATH, 'post');
+export function setMessagesToSeen(http: HttpClient, rootUrl: string, params: SetMessagesToSeen$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
+  const rb = new RequestBuilder(rootUrl, setMessagesToSeen.PATH, 'patch');
   if (params) {
     rb.query('chat-id', params['chat-id'], {});
-    rb.query('media-type', params['media-type'], {});
-    rb.body(params.body, 'multipart/form-data');
   }
 
   return http.request(
@@ -35,4 +29,4 @@ export function uploadMedia(http: HttpClient, rootUrl: string, params: UploadMed
   );
 }
 
-uploadMedia.PATH = '/messages/upload-file';
+setMessagesToSeen.PATH = '/messages';

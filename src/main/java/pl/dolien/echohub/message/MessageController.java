@@ -28,15 +28,16 @@ public class MessageController {
         service.saveMessage(message);
     }
 
-    @PostMapping(value = "/upload-media", consumes = "multipart/form-data")
+    @PostMapping(value = "/upload-file", consumes = "multipart/form-data")
     @ResponseStatus(CREATED)
     public void uploadMedia(
             @RequestParam("chat-id") String chatId,
             @Parameter()
             @RequestParam("file") MultipartFile file,
+            @RequestParam("media-type") String mediaType,
             Authentication auth
     ) {
-        service.uploadMediaMessage(chatId, file, auth);
+        service.uploadMediaMessage(chatId, file, auth, mediaType);
     }
 
     @PatchMapping
