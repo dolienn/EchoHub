@@ -76,7 +76,7 @@ class FileServiceTest {
     }
 
     @Test
-    public void shouldThrowExceptionWhenCreatingDirectory() {
+    void shouldThrowExceptionWhenCreatingDirectory() {
         MultipartFile multipartFile = mock(MultipartFile.class);
         FileSystem fileSystem = mock(FileSystem.class);
         FileService fileService = new FileService(fileSystem);

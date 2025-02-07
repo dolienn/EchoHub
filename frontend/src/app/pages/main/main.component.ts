@@ -1,22 +1,28 @@
-import {Component, ElementRef, OnDestroy, OnInit, ViewChild} from '@angular/core';
-import {Notification} from "./notification";
-import {ChatResponse} from "../../services/models/chat-response";
-import {ChatService} from "../../services/services/chat.service";
-import {KeycloakService} from "../../utils/keycloak/keycloak.service";
-import {MessageResponse} from "../../services/models/message-response";
-import {MessageRequest} from "../../services/models/message-request";
-import {MessageService} from "../../services/services/message.service";
-import {PickerComponent} from "@ctrl/ngx-emoji-mart";
-import {DatePipe, NgClass, NgIf} from "@angular/common";
-import {ChatListComponent} from "../../components/chat-list/chat-list.component";
-import {FormsModule} from "@angular/forms";
-import {EmojiData} from "@ctrl/ngx-emoji-mart/ngx-emoji";
-import {LoaderComponent} from "../../components/loader/loader.component";
-import {WebSocketService} from "../../services/services/websocket.service";
-import {LoaderService} from "../../services/services/loader.service";
-import {AudioRecorderService} from "../../services/services/audio-recorder.service";
-import {MediaUploaderService} from "../../services/services/media-uploader.service";
-import {ScrollerService} from "../../services/services/scroller.service";
+import {
+  Component,
+  ElementRef,
+  OnDestroy,
+  OnInit,
+  ViewChild,
+} from '@angular/core';
+import { Notification } from './notification';
+import { ChatResponse } from '../../services/services/models/chat-response';
+import { ChatService } from '../../services/services/chat.service';
+import { KeycloakService } from '../../utils/keycloak/keycloak.service';
+import { MessageResponse } from '../../services/services/models/message-response';
+import { MessageRequest } from '../../services/services/models/message-request';
+import { MessageService } from '../../services/services/message.service';
+import { PickerComponent } from '@ctrl/ngx-emoji-mart';
+import { DatePipe, NgClass, NgIf } from '@angular/common';
+import { ChatListComponent } from '../../components/chat-list/chat-list.component';
+import { FormsModule } from '@angular/forms';
+import { EmojiData } from '@ctrl/ngx-emoji-mart/ngx-emoji';
+import { LoaderComponent } from '../../components/loader/loader.component';
+import { WebSocketService } from '../../services/services/websocket.service';
+import { LoaderService } from '../../services/services/loader.service';
+import { AudioRecorderService } from '../../services/services/audio-recorder.service';
+import { MediaUploaderService } from '../../services/services/media-uploader.service';
+import { ScrollerService } from '../../services/services/scroller.service';
 
 @Component({
   selector: 'app-main',
@@ -28,10 +34,10 @@ import {ScrollerService} from "../../services/services/scroller.service";
     FormsModule,
     LoaderComponent,
     NgIf,
-    NgClass
+    NgClass,
   ],
   templateUrl: './main.component.html',
-  styleUrl: './main.component.scss'
+  styleUrl: './main.component.scss',
 })
 export class MainComponent implements OnInit, OnDestroy {
   @ViewChild('messages') messagesRef!: ElementRef;
@@ -50,8 +56,7 @@ export class MainComponent implements OnInit, OnDestroy {
     protected audioRecorderService: AudioRecorderService,
     protected mediaUploaderService: MediaUploaderService,
     private scrollerService: ScrollerService
-  ) {
-  }
+  ) {}
 
   ngOnInit(): void {
     this.initWebSocket();
@@ -72,7 +77,11 @@ export class MainComponent implements OnInit, OnDestroy {
 
   markMessagesAsSeen(): void {
     if (this.mediaUploaderService.selectedChat.id) {
-      this.messageService.setMessagesToSeen({ 'chat-id': this.mediaUploaderService.selectedChat.id }).subscribe();
+      this.messageService
+        .setMessagesToSeen({
+          'chat-id': this.mediaUploaderService.selectedChat.id,
+        })
+        .subscribe();
       this.mediaUploaderService.selectedChat.unreadCount = 0;
     }
   }
@@ -92,7 +101,7 @@ export class MainComponent implements OnInit, OnDestroy {
       const messageRequest: MessageRequest = this.createMessageRequest();
       this.messageService.saveMessage({ body: messageRequest }).subscribe({
         next: () => this.onMessageSent(),
-        error: (err) => console.error('Error sending message', err)
+        error: (err) => console.error('Error sending message', err),
       });
     }
   }
@@ -125,15 +134,20 @@ export class MainComponent implements OnInit, OnDestroy {
     if (userId && token) {
       this.webSocketService.connect(userId, token);
 
-      this.webSocketService.getNotifications().subscribe((notification: any) => {
-        this.handleNotification(notification);
-      });
+      this.webSocketService
+        .getNotifications()
+        .subscribe((notification: any) => {
+          this.handleNotification(notification);
+        });
     }
   }
 
   private handleNotification(notification: Notification) {
     if (!notification) return;
-    if (this.mediaUploaderService.selectedChat && this.mediaUploaderService.selectedChat.id === notification.chatId) {
+    if (
+      this.mediaUploaderService.selectedChat &&
+      this.mediaUploaderService.selectedChat.id === notification.chatId
+    ) {
       this.handleChatNotification(notification);
     } else {
       this.handleGeneralNotification(notification);
@@ -149,25 +163,30 @@ export class MainComponent implements OnInit, OnDestroy {
         this.addMessage(notification);
         break;
       case 'SEEN':
-        this.mediaUploaderService.chatMessages.forEach(m => m.state = 'SEEN');
+        this.mediaUploaderService.chatMessages.forEach(
+          (m) => (m.state = 'SEEN')
+        );
         break;
     }
   }
 
   private addMessage(notification: Notification): void {
-    const message: MessageResponse = this.createMessageResponseByNotification(notification);
+    const message: MessageResponse =
+      this.createMessageResponseByNotification(notification);
     this.mediaUploaderService.chatMessages.push(message);
     this.updateChatLastMessage(notification);
   }
 
-  private createMessageResponseByNotification(notification: Notification): MessageResponse {
+  private createMessageResponseByNotification(
+    notification: Notification
+  ): MessageResponse {
     return {
       senderId: notification.senderId,
       receiverId: notification.receiverId,
       content: notification.content,
       type: notification.messageType,
       media: notification.media,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
   }
 
@@ -185,7 +204,7 @@ export class MainComponent implements OnInit, OnDestroy {
   }
 
   private handleGeneralNotification(notification: Notification): void {
-    const destChat = this.chats.find(c => c.id === notification.chatId);
+    const destChat = this.chats.find((c) => c.id === notification.chatId);
 
     if (destChat && notification.type !== 'SEEN') {
       this.updateChat(destChat, notification);
@@ -217,7 +236,7 @@ export class MainComponent implements OnInit, OnDestroy {
       lastMessage: notification.content,
       name: notification.chatName,
       unreadCount: 1,
-      lastMessageTime: new Date().toISOString()
+      lastMessageTime: new Date().toISOString(),
     };
     this.chats.unshift(newChat);
   }
@@ -226,28 +245,31 @@ export class MainComponent implements OnInit, OnDestroy {
     this.loaderService.setLoadingState(true);
     this.chatService.getChatsByReceiver().subscribe({
       next: (res) => {
-        this.chats = res
+        this.chats = res;
         this.loaderService.setLoadingState(false);
       },
       error: (err) => {
         this.loaderService.setLoadingState(false);
         console.error('Error loading chats', err);
-      }
+      },
     });
   }
 
   private loadMessages(chatId: string) {
     this.isMessagesLoading = true;
-    this.messageService.getMessages({'chat-id': chatId}).subscribe({
+    this.messageService.getMessages({ 'chat-id': chatId }).subscribe({
       next: (messages) => {
         this.mediaUploaderService.chatMessages = messages;
         this.isMessagesLoading = false;
-        setTimeout(() => this.scrollerService.scrollToBottom(this.messagesRef), 1);
+        setTimeout(
+          () => this.scrollerService.scrollToBottom(this.messagesRef),
+          1
+        );
       },
       error: (err) => {
         this.isMessagesLoading = false;
-        console.error('Error loading messages', err)
-      }
+        console.error('Error loading messages', err);
+      },
     });
   }
 
@@ -257,25 +279,28 @@ export class MainComponent implements OnInit, OnDestroy {
       senderId: this.mediaUploaderService.getSenderId(),
       receiverId: this.mediaUploaderService.getReceiverId(),
       content: this.mediaUploaderService.messageContent,
-      type: 'TEXT'
+      type: 'TEXT',
     };
   }
 
   private onMessageSent(): void {
     const message: MessageResponse = this.createMessageResponse('SENT');
     this.mediaUploaderService.chatMessages.push(message);
-    this.mediaUploaderService.selectedChat.lastMessage = this.mediaUploaderService.messageContent;
+    this.mediaUploaderService.selectedChat.lastMessage =
+      this.mediaUploaderService.messageContent;
     this.mediaUploaderService.resetMessageContent(this.messagesRef);
   }
 
-  private createMessageResponse(state: "SENT" | "SEEN" | undefined): MessageResponse {
+  private createMessageResponse(
+    state: 'SENT' | 'SEEN' | undefined
+  ): MessageResponse {
     return {
       senderId: this.mediaUploaderService.getSenderId(),
       receiverId: this.mediaUploaderService.getReceiverId(),
       content: this.mediaUploaderService.messageContent,
       type: 'TEXT',
       state: state,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
     };
   }
 }

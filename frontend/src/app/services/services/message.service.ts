@@ -13,7 +13,7 @@ import { StrictHttpResponse } from '../strict-http-response';
 
 import { getMessages } from '../fn/message/get-messages';
 import { GetMessages$Params } from '../fn/message/get-messages';
-import { MessageResponse } from '../models/message-response';
+import { MessageResponse } from './models/message-response';
 import { saveMessage } from '../fn/message/save-message';
 import { SaveMessage$Params } from '../fn/message/save-message';
 import { setMessagesToSeen } from '../fn/message/set-messages-to-seen';

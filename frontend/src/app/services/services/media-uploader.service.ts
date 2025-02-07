@@ -1,7 +1,7 @@
 import {ElementRef, Injectable} from '@angular/core';
 import {MessageService} from "./message.service";
-import {ChatResponse} from "../models/chat-response";
-import {MessageResponse} from "../models/message-response";
+import {ChatResponse} from "./models/chat-response";
+import {MessageResponse} from "./models/message-response";
 import {KeycloakService} from "../../utils/keycloak/keycloak.service";
 import {ScrollerService} from "./scroller.service";
 

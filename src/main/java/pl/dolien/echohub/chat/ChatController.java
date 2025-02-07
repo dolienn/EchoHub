@@ -32,4 +32,19 @@ public class ChatController {
     public List<ChatResponse> getChatsByReceiver(Authentication auth) {
         return chatService.getChatsByReceiver(auth);
     }
+
+    @PostMapping("{chatId}/favorite")
+    public void addToFavorite(@PathVariable("chatId") String chatId, Authentication auth) {
+        chatService.addToFavorite(chatId, auth.getName());
+    }
+
+    @DeleteMapping("{chatId}/favorite")
+    public void removeFromFavorite(@PathVariable("chatId") String chatId, Authentication auth) {
+        chatService.removeFromFavorite(chatId, auth.getName());
+    }
+
+    @GetMapping("{chatId}/favorite")
+    public boolean isFavoriteForUser(@PathVariable("chatId") String chatId, Authentication auth) {
+        return chatService.isFavoriteForUser(chatId, auth.getName());
+    }
 }

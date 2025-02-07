@@ -13,7 +13,7 @@ import { StrictHttpResponse } from '../strict-http-response';
 
 import { getAllUsers } from '../fn/user/get-all-users';
 import { GetAllUsers$Params } from '../fn/user/get-all-users';
-import { UserResponse } from '../models/user-response';
+import { UserResponse } from './models/user-response';
 
 @Injectable({ providedIn: 'root' })
 export class UserService extends BaseService {

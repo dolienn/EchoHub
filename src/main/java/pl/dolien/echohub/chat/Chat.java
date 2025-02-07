@@ -8,7 +8,10 @@ import pl.dolien.echohub.message.Message;
 import pl.dolien.echohub.user.User;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import static jakarta.persistence.FetchType.EAGER;
 import static jakarta.persistence.GenerationType.UUID;
@@ -45,6 +48,11 @@ public class Chat extends BaseAuditingEntity {
     @OneToMany(mappedBy = "chat", fetch = EAGER)
     @OrderBy("createdDate DESC")
     private List<Message> messages;
+
+    @ElementCollection(fetch = EAGER)
+    @CollectionTable(name = "chat_favorites", joinColumns = @JoinColumn(name = "chat_id"))
+    @Column(name = "user_id")
+    private Set<String> favoriteForUsers = new HashSet<>();
 
     @Transient
     public String getChatName(final String senderId) {
@@ -86,5 +94,17 @@ public class Chat extends BaseAuditingEntity {
             return messages.get(0).getCreatedDate();
         }
         return null;
+    }
+
+    public void addFavorite(String userId) {
+        favoriteForUsers.add(userId);
+    }
+
+    public void removeFavorite(String userId) {
+        favoriteForUsers.remove(userId);
+    }
+
+    public boolean isFavoriteForUser(String userId) {
+        return favoriteForUsers.contains(userId);
     }
 }

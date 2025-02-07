@@ -8,7 +8,7 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { UserResponse } from '../../models/user-response';
+import { UserResponse } from '../../services/models/user-response';
 
 export interface GetAllUsers$Params {
 }

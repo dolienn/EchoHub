@@ -11,12 +11,12 @@ import pl.dolien.echohub.chat.dto.ChatResponse;
 import pl.dolien.echohub.user.User;
 import pl.dolien.echohub.user.UserService;
 
+import java.util.HashSet;
 import java.util.List;
 
 import static java.util.Optional.empty;
 import static java.util.Optional.of;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 class ChatServiceTest {
@@ -96,6 +96,36 @@ class ChatServiceTest {
         verify(repository, times(1)).findById(chat.getId());
     }
 
+    @Test
+    void shouldAddToFavorite() {
+        when(repository.findById(chat.getId())).thenReturn(of(chat));
+
+        chatService.addToFavorite(chat.getId(), SENDER_ID);
+
+        verify(repository, times(1)).findById(chat.getId());
+        verify(repository, times(1)).save(chat);
+    }
+
+    @Test
+    void shouldRemoveFromFavorite() {
+        when(repository.findById(chat.getId())).thenReturn(of(chat));
+
+        chatService.removeFromFavorite(chat.getId(), SENDER_ID);
+
+        verify(repository, times(1)).findById(chat.getId());
+        verify(repository, times(1)).save(chat);
+    }
+
+    @Test
+    void shouldReturnTrueWhenChatIsFavoriteForUser() {
+        when(repository.findById(chat.getId())).thenReturn(of(chat));
+
+        boolean result = chatService.isFavoriteForUser(chat.getId(), SENDER_ID);
+
+        assertTrue(result);
+        verify(repository, times(1)).findById(chat.getId());
+    }
+
     private void initData() {
         sender = User.builder().id(SENDER_ID).build();
         recipient = User.builder().id(RECIPIENT_ID).build();
@@ -104,6 +134,7 @@ class ChatServiceTest {
                 .id("1")
                 .sender(sender)
                 .recipient(recipient)
+                .favoriteForUsers(new HashSet<>(List.of(SENDER_ID)))
                 .build();
 
         chatResponse = ChatResponse.builder()
@@ -120,12 +151,15 @@ class ChatServiceTest {
     private void mockGetChatsByReceiver() {
         when(authentication.getName()).thenReturn(SENDER_ID);
         when(repository.findChatsBySenderId(SENDER_ID)).thenReturn(List.of(chat));
+        when(userService.findUserByPublicId(SENDER_ID)).thenReturn(sender);
         when(mapper.toChatResponse(chat, SENDER_ID)).thenReturn(chatResponse);
     }
 
     private void verifyGetChatsByReceiver() {
         verify(authentication, times(1)).getName();
         verify(repository, times(1)).findChatsBySenderId(SENDER_ID);
+        verify(userService, times(1)).findUserByPublicId(SENDER_ID);
+        verify(userService, times(1)).saveUser(sender);
         verify(mapper, times(1)).toChatResponse(chat, SENDER_ID);
     }
 

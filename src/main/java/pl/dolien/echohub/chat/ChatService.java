@@ -11,6 +11,7 @@ import pl.dolien.echohub.user.UserService;
 
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -32,7 +33,6 @@ public class ChatService {
                 .stream()
                 .map(chat -> mapper.toChatResponse(chat, userId))
                 .toList();
-
     }
 
     @Transactional
@@ -44,6 +44,23 @@ public class ChatService {
 
     public Chat getChatById(String chatId) {
         return repository.findById(chatId).orElseThrow(() -> new EntityNotFoundException(CHAT_NOT_FOUND_MSG));
+    }
+
+    public void addToFavorite(String chatId, String userId) {
+        Chat chat = getChatById(chatId);
+        chat.addFavorite(userId);
+        repository.save(chat);
+    }
+
+    public void removeFromFavorite(String chatId, String userId) {
+        Chat chat = getChatById(chatId);
+        chat.removeFavorite(userId);
+        repository.save(chat);
+    }
+
+    public boolean isFavoriteForUser(String chatId, String userId) {
+        Chat chat = getChatById(chatId);
+        return chat.isFavoriteForUser(userId);
     }
 
     private String createAndSaveChat(String senderId, String receiverId) {

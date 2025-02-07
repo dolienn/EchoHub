@@ -9,20 +9,14 @@ import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
 
-export interface UploadMedia$Params {
-  'chat-id': string;
-  'media-type': string;
-      body?: {
-'file': Blob;
-}
+export interface RemoveFromFavorite$Params {
+  chatId: string;
 }
 
-export function uploadMedia(http: HttpClient, rootUrl: string, params: UploadMedia$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
-  const rb = new RequestBuilder(rootUrl, uploadMedia.PATH, 'post');
+export function removeFromFavorite(http: HttpClient, rootUrl: string, params: RemoveFromFavorite$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
+  const rb = new RequestBuilder(rootUrl, removeFromFavorite.PATH, 'delete');
   if (params) {
-    rb.query('chat-id', params['chat-id'], {});
-    rb.query('media-type', params['media-type'], {});
-    rb.body(params.body, 'multipart/form-data');
+    rb.path('chatId', params.chatId, {});
   }
 
   return http.request(
@@ -35,4 +29,4 @@ export function uploadMedia(http: HttpClient, rootUrl: string, params: UploadMed
   );
 }
 
-uploadMedia.PATH = '/messages/upload-file';
+removeFromFavorite.PATH = '/chats/{chatId}/favorite';

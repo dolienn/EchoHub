@@ -72,12 +72,10 @@ public class MessageService {
             String chatId,
             MultipartFile file,
             Authentication auth,
-            String mediaType
+            MessageType messageType
     ) {
         Chat chat = chatService.getChatById(chatId);
-
-        var messageType = getMessageType(mediaType);
-        var notificationType = getNotificationType(mediaType);
+        var notificationType = getNotificationType(messageType);
 
         final String senderId = getSenderId(chat, auth.getName());
         final String recipientId = getRecipientId(chat, auth.getName());
@@ -119,18 +117,18 @@ public class MessageService {
         }
     }
 
-    private NotificationType getNotificationType(String fileType){
-        switch (fileType) {
-            case "AUDIO" -> {
+    private NotificationType getNotificationType(MessageType messageType){
+        switch (messageType) {
+            case AUDIO -> {
                 return NotificationType.AUDIO;
             }
-            case "IMAGE" -> {
+            case IMAGE -> {
                 return NotificationType.IMAGE;
             }
-            case "VIDEO" -> {
+            case VIDEO -> {
                 return NotificationType.VIDEO;
             }
-            default -> throw new UnsupportedOperationException("Unsupported file type: " + fileType);
+            default -> throw new UnsupportedOperationException("Unsupported file type: " + messageType);
         }
     }
 

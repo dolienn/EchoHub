@@ -16,13 +16,13 @@ import pl.dolien.echohub.common.StringResponse;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 class ChatControllerTest {
 
+    private static final String CHAT_ID = "3";
     private final ObjectMapper objectMapper = new ObjectMapper();
     @InjectMocks
     private ChatController controller;
@@ -42,12 +42,11 @@ class ChatControllerTest {
     void shouldCreateChat() throws Exception {
         String senderId = "1";
         String receiverId = "2";
-        String chatId = "3";
         StringResponse stringResponse = StringResponse.builder()
-                .response(chatId)
+                .response(CHAT_ID)
                 .build();
 
-        when(chatService.createChat(senderId, receiverId)).thenReturn(chatId);
+        when(chatService.createChat(senderId, receiverId)).thenReturn(CHAT_ID);
 
         performCreateChat(senderId, receiverId)
                 .andExpect(status().isOk())
@@ -59,7 +58,7 @@ class ChatControllerTest {
     @Test
     void shouldReturnChatsByReceiver() throws Exception {
         ChatResponse chatResponse = ChatResponse.builder()
-                .id("1")
+                .id(CHAT_ID)
                 .build();
 
         when(chatService.getChatsByReceiver(auth)).thenReturn(List.of(chatResponse));
@@ -67,6 +66,24 @@ class ChatControllerTest {
         performGetChatsByReceiver()
                 .andExpect(status().isOk())
                 .andExpect(content().json(objectMapper.writeValueAsString(List.of(chatResponse))));
+
+        verify(chatService, times(1)).getChatsByReceiver(auth);
+    }
+
+    @Test
+    void shouldAddToFavorite() throws Exception {
+        performAddToFavorite(CHAT_ID)
+                .andExpect(status().isOk());
+
+        verify(chatService, times(1)).addToFavorite(CHAT_ID, auth.getName());
+    }
+
+    @Test
+    void shouldRemoveFromFavorite() throws Exception {
+        performRemoveFromFavorite(CHAT_ID)
+                .andExpect(status().isOk());
+
+        verify(chatService, times(1)).removeFromFavorite(CHAT_ID, auth.getName());
     }
 
     private ResultActions performGetChatsByReceiver() throws Exception {
@@ -78,5 +95,15 @@ class ChatControllerTest {
         return mockMvc.perform(post("/chats")
                 .param("sender-id", senderId)
                 .param("receiver-id", receiverId));
+    }
+
+    private ResultActions performAddToFavorite(String chatId) throws Exception {
+        return mockMvc.perform(post("/chats/{chatId}/favorite", chatId)
+                .principal(auth));
+    }
+
+    private ResultActions performRemoveFromFavorite(String chatId) throws Exception {
+        return mockMvc.perform(delete("/chats/{chatId}/favorite", chatId)
+                .principal(auth));
     }
 }

@@ -15,6 +15,7 @@ import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.MULTIPART_FORM_DATA;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+import static pl.dolien.echohub.message.MessageType.IMAGE;
 
 class MessageControllerTest {
 
@@ -43,7 +44,8 @@ class MessageControllerTest {
         verify(service, times(1)).uploadMediaMessage(
                 anyString(),
                 any(MultipartFile.class),
-                any(Authentication.class)
+                any(Authentication.class),
+                any(MessageType.class)
         );
     }
 
@@ -62,9 +64,10 @@ class MessageControllerTest {
     }
 
     private ResultActions performUploadMedia(MultipartFile file) throws Exception {
-        return mockMvc.perform(multipart("/messages/upload-media")
+        return mockMvc.perform(multipart("/messages/upload-file")
                 .file("file", file.getBytes())
                 .param("chat-id", CHAT_ID)
+                .param("media-type", String.valueOf(IMAGE))
                 .principal(auth)
                 .contentType(MULTIPART_FORM_DATA));
     }

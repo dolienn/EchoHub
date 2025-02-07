@@ -11,12 +11,18 @@ import { BaseService } from '../base-service';
 import { ApiConfiguration } from '../api-configuration';
 import { StrictHttpResponse } from '../strict-http-response';
 
-import { ChatResponse } from '../models/chat-response';
+import { addToFavorite } from '../fn/chat/add-to-favorite';
+import { AddToFavorite$Params } from '../fn/chat/add-to-favorite';
+import { ChatResponse } from './models/chat-response';
 import { createChat } from '../fn/chat/create-chat';
 import { CreateChat$Params } from '../fn/chat/create-chat';
 import { getChatsByReceiver } from '../fn/chat/get-chats-by-receiver';
 import { GetChatsByReceiver$Params } from '../fn/chat/get-chats-by-receiver';
-import { StringResponse } from '../models/string-response';
+import { isFavoriteForUser } from '../fn/chat/is-favorite-for-user';
+import { IsFavoriteForUser$Params } from '../fn/chat/is-favorite-for-user';
+import { removeFromFavorite } from '../fn/chat/remove-from-favorite';
+import { RemoveFromFavorite$Params } from '../fn/chat/remove-from-favorite';
+import { StringResponse } from './models/string-response';
 
 @Injectable({ providedIn: 'root' })
 export class ChatService extends BaseService {
@@ -71,6 +77,81 @@ export class ChatService extends BaseService {
   createChat(params: CreateChat$Params, context?: HttpContext): Observable<StringResponse> {
     return this.createChat$Response(params, context).pipe(
       map((r: StrictHttpResponse<StringResponse>): StringResponse => r.body)
+    );
+  }
+
+  /** Path part for operation `isFavoriteForUser()` */
+  static readonly IsFavoriteForUserPath = '/chats/{chatId}/favorite';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `isFavoriteForUser()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  isFavoriteForUser$Response(params: IsFavoriteForUser$Params, context?: HttpContext): Observable<StrictHttpResponse<boolean>> {
+    return isFavoriteForUser(this.http, this.rootUrl, params, context);
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `isFavoriteForUser$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  isFavoriteForUser(params: IsFavoriteForUser$Params, context?: HttpContext): Observable<boolean> {
+    return this.isFavoriteForUser$Response(params, context).pipe(
+      map((r: StrictHttpResponse<boolean>): boolean => r.body)
+    );
+  }
+
+  /** Path part for operation `addToFavorite()` */
+  static readonly AddToFavoritePath = '/chats/{chatId}/favorite';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `addToFavorite()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  addToFavorite$Response(params: AddToFavorite$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
+    return addToFavorite(this.http, this.rootUrl, params, context);
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `addToFavorite$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  addToFavorite(params: AddToFavorite$Params, context?: HttpContext): Observable<void> {
+    return this.addToFavorite$Response(params, context).pipe(
+      map((r: StrictHttpResponse<void>): void => r.body)
+    );
+  }
+
+  /** Path part for operation `removeFromFavorite()` */
+  static readonly RemoveFromFavoritePath = '/chats/{chatId}/favorite';
+
+  /**
+   * This method provides access to the full `HttpResponse`, allowing access to response headers.
+   * To access only the response body, use `removeFromFavorite()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  removeFromFavorite$Response(params: RemoveFromFavorite$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
+    return removeFromFavorite(this.http, this.rootUrl, params, context);
+  }
+
+  /**
+   * This method provides access only to the response body.
+   * To access the full response (for headers, for example), `removeFromFavorite$Response()` instead.
+   *
+   * This method doesn't expect any request body.
+   */
+  removeFromFavorite(params: RemoveFromFavorite$Params, context?: HttpContext): Observable<void> {
+    return this.removeFromFavorite$Response(params, context).pipe(
+      map((r: StrictHttpResponse<void>): void => r.body)
     );
   }
 

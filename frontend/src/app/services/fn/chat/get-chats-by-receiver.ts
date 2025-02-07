@@ -8,7 +8,7 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { ChatResponse } from '../../models/chat-response';
+import { ChatResponse } from '../../services/models/chat-response';
 
 export interface GetChatsByReceiver$Params {
 }

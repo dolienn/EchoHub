@@ -1,11 +1,11 @@
 import {Component, input, InputSignal, OnInit, output, OutputEmitterRef} from '@angular/core';
-import {ChatResponse} from "../../services/models/chat-response";
-import {UserResponse} from "../../services/models/user-response";
+import {ChatResponse} from "../../services/services/models/chat-response";
+import {UserResponse} from "../../services/services/models/user-response";
 import {UserService} from "../../services/services/user.service";
 import {ChatService} from "../../services/services/chat.service";
 import {KeycloakService} from "../../utils/keycloak/keycloak.service";
-import {StringResponse} from "../../services/models/string-response";
-import {DatePipe, NgIf} from "@angular/common";
+import {StringResponse} from "../../services/services/models/string-response";
+import {DatePipe, NgClass, NgIf} from "@angular/common";
 import {LoaderComponent} from "../loader/loader.component";
 import {LoaderService} from "../../services/services/loader.service";
 
@@ -15,7 +15,8 @@ import {LoaderService} from "../../services/services/loader.service";
   imports: [
     DatePipe,
     NgIf,
-    LoaderComponent
+    LoaderComponent,
+    NgClass
   ],
   templateUrl: './chat-list.component.html',
   styleUrl: './chat-list.component.scss'
@@ -32,6 +33,7 @@ export class ChatListComponent implements OnInit {
   filteredContacts: UserResponse[] = [];
   filterType: 'all' | 'unread' | 'favorites' | 'search' = 'all';
   searchQuery: string = '';
+  hoverFavorite: any = null;
 
   constructor(
     private chatService: ChatService,
@@ -81,6 +83,10 @@ export class ChatListComponent implements OnInit {
 
     if (type === 'unread') {
       this.filteredChats = this.getUnreadChats();
+    } else if (type === 'favorites') {
+      this.filteredChats = this.getFavoriteChats();
+    } else if (type === 'search') {
+      this.filteredChats = this.filterChatsByQuery(this.searchQuery);
     }
   }
 
@@ -90,7 +96,6 @@ export class ChatListComponent implements OnInit {
 
     if (this.searchQuery) {
       this.changeFilterType('search');
-      this.filteredChats = this.filterChatsByQuery(this.searchQuery);
     }
   }
 
@@ -100,6 +105,33 @@ export class ChatListComponent implements OnInit {
 
   wrapMessage(message: string | undefined): string {
     return message && message.length > 20 ? `${message.slice(0, 17)}...` : message || '';
+  }
+
+  toggleFavorite(chat: ChatResponse, event: Event): void {
+    event.stopPropagation();
+    this.chatService.isFavoriteForUser({
+      'chatId': chat.id as string
+    }).subscribe((data: boolean) => {
+      chat.favorite = data;
+    });
+
+    if (chat.favorite) {
+      this.chatService.removeFromFavorite({
+        'chatId': chat.id as string
+      }).subscribe(() => {
+        chat.favorite = false;
+      });
+    } else {
+      this.chatService.addToFavorite({
+        'chatId': chat.id as string
+      }).subscribe(() => {
+        chat.favorite = true;
+      });
+    }
+  }
+
+  private getFavoriteChats(): ChatResponse[] {
+    return this.chats().filter(chat => chat.favorite);
   }
 
   private updateFilteredContacts(): void {

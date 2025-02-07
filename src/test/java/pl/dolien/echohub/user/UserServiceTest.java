@@ -64,6 +64,13 @@ class UserServiceTest {
         verifyGetAllUsersExceptSelf();
     }
 
+    @Test
+    void shouldSaveUser() {
+        userService.saveUser(user);
+
+        verify(userRepository, times(1)).save(user);
+    }
+
     private void mockGetAllUsersExceptSelf() {
         when(auth.getName()).thenReturn(user.getId());
         when(userRepository.findAllUsersExceptSelf(user.getId())).thenReturn(List.of(user));

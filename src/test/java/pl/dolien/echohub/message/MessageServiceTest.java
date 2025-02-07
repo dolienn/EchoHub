@@ -23,6 +23,7 @@ import static org.mockito.Mockito.*;
 import static pl.dolien.echohub.message.MessageMapper.toMessageResponse;
 import static pl.dolien.echohub.message.MessageState.SEEN;
 import static pl.dolien.echohub.message.MessageState.SENT;
+import static pl.dolien.echohub.message.MessageType.IMAGE;
 import static pl.dolien.echohub.message.MessageType.TEXT;
 
 class MessageServiceTest {
@@ -97,7 +98,7 @@ class MessageServiceTest {
         when(fileService.saveFile(file, SENDER_ID)).thenReturn("filePath");
         when(auth.getName()).thenReturn(SENDER_ID);
 
-        messageService.uploadMediaMessage(CHAT_ID, file, auth);
+        messageService.uploadMediaMessage(CHAT_ID, file, auth, IMAGE);
 
         verify(chatService, times(1)).getChatById(CHAT_ID);
         verify(fileService, times(1)).saveFile(file, SENDER_ID);

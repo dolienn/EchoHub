@@ -8,7 +8,7 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { MessageRequest } from '../../models/message-request';
+import { MessageRequest } from '../../services/models/message-request';
 
 export interface SaveMessage$Params {
       body: MessageRequest

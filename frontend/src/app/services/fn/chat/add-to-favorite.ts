@@ -9,14 +9,14 @@ import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
 
-export interface SetMessagesToSeen$Params {
-  'chat-id': string;
+export interface AddToFavorite$Params {
+  chatId: string;
 }
 
-export function setMessagesToSeen(http: HttpClient, rootUrl: string, params: SetMessagesToSeen$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
-  const rb = new RequestBuilder(rootUrl, setMessagesToSeen.PATH, 'patch');
+export function addToFavorite(http: HttpClient, rootUrl: string, params: AddToFavorite$Params, context?: HttpContext): Observable<StrictHttpResponse<void>> {
+  const rb = new RequestBuilder(rootUrl, addToFavorite.PATH, 'post');
   if (params) {
-    rb.query('chat-id', params['chat-id'], {});
+    rb.path('chatId', params.chatId, {});
   }
 
   return http.request(
@@ -29,4 +29,4 @@ export function setMessagesToSeen(http: HttpClient, rootUrl: string, params: Set
   );
 }
 
-setMessagesToSeen.PATH = '/messages';
+addToFavorite.PATH = '/chats/{chatId}/favorite';

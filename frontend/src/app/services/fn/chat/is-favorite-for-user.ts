@@ -8,14 +8,15 @@ import { filter, map } from 'rxjs/operators';
 import { StrictHttpResponse } from '../../strict-http-response';
 import { RequestBuilder } from '../../request-builder';
 
-import { UserResponse } from '../../models/user-response';
 
-export interface GetAllUsers$Params {
+export interface IsFavoriteForUser$Params {
+  chatId: string;
 }
 
-export function getAllUsers(http: HttpClient, rootUrl: string, params?: GetAllUsers$Params, context?: HttpContext): Observable<StrictHttpResponse<Array<UserResponse>>> {
-  const rb = new RequestBuilder(rootUrl, getAllUsers.PATH, 'get');
+export function isFavoriteForUser(http: HttpClient, rootUrl: string, params: IsFavoriteForUser$Params, context?: HttpContext): Observable<StrictHttpResponse<boolean>> {
+  const rb = new RequestBuilder(rootUrl, isFavoriteForUser.PATH, 'get');
   if (params) {
+    rb.path('chatId', params.chatId, {});
   }
 
   return http.request(
@@ -23,9 +24,9 @@ export function getAllUsers(http: HttpClient, rootUrl: string, params?: GetAllUs
   ).pipe(
     filter((r: any): r is HttpResponse<any> => r instanceof HttpResponse),
     map((r: HttpResponse<any>) => {
-      return r as StrictHttpResponse<Array<UserResponse>>;
+      return (r as HttpResponse<any>).clone({ body: String((r as HttpResponse<any>).body) === 'true' }) as StrictHttpResponse<boolean>;
     })
   );
 }
 
-getAllUsers.PATH = '/users';
+isFavoriteForUser.PATH = '/chats/{chatId}/favorite';

@@ -34,10 +34,10 @@ public class MessageController {
             @RequestParam("chat-id") String chatId,
             @Parameter()
             @RequestParam("file") MultipartFile file,
-            @RequestParam("media-type") String mediaType,
+            @RequestParam("media-type") MessageType messageType,
             Authentication auth
     ) {
-        service.uploadMediaMessage(chatId, file, auth, mediaType);
+        service.uploadMediaMessage(chatId, file, auth, messageType);
     }
 
     @PatchMapping

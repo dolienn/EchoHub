@@ -29,18 +29,18 @@ img {
   }
 }
 
-.online-status {
-  background: $color-online;
+.online-status, .offline-status {
   width: 0.625rem;
   height: 0.625rem;
   border-radius: 50%;
 }
 
+.online-status {
+  background: $color-online;
+}
+
 .offline-status {
   background: $color-offline;
-  width: 0.625rem;
-  height: 0.625rem;
-  border-radius: 50%;
 }
 
 .unread-msg-badge {
@@ -63,6 +63,26 @@ img {
   cursor: pointer;
 }
 
+.favourite-container {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  height: 100%;
+}
+
+.chat-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.625rem;
+  width: 100%;
+}
+
+@media (max-width: 1090px) {
+  .chat-container {
+    flex-direction: column !important;
+  }
+}
 
 @media (max-width: 996px) {
   .input-group-text {
